@@ -12,24 +12,15 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout repository (sparse)
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
-          filter: blob:none
-          sparse-checkout: |
-            .github/
-          sparse-checkout-cone-mode: true
-
-      - name: Fetch before commit
-        if: github.event.before != '0000000000000000000000000000000000000000'
-        run: |
-          git fetch --depth=1 --filter=blob:none origin ${{ github.event.before }}
+          fetch-depth: 0
 
       - name: Get changed files and build jsDelivr URLs
         id: purge_urls
         run: |
-          FILES=$(git diff --no-renames --name-only \
+          FILES=$(git diff --name-only \
             ${{ github.event.before }} \
             ${{ github.event.after }} \
             --diff-filter=AMR)

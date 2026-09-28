@@ -47,13 +47,25 @@
         updateBannerVisibility();
       }
 
+      function assetBaseUrl() {
+        return document.baseURI || location.href;
+      }
+
+      function assetUrl(url) {
+        return new URL(url, assetBaseUrl()).href;
+      }
+
+      function assetHost() {
+        return new URL(assetBaseUrl(), location.href).host;
+      }
+
       var buildUrl = "Build";
       var loaderUrl = buildUrl + "/AmongUsWeb.loader.js";
       var config = {
         dataUrl: null,
         frameworkUrl: buildUrl + "/AmongUsWeb.framework.js",
         codeUrl: null,
-        streamingAssetsUrl: "StreamingAssets",
+        streamingAssetsUrl: assetUrl("StreamingAssets"),
         companyName: "Innersloth",
         productName: "Among Us",
         productVersion: "2026.6.5",
@@ -95,9 +107,9 @@
       function rewriteToServer(url, wantWs) {
         if (!serverReplacement) return url;
         var target;
-        try { target = new URL(url, location.href); } catch (e) { return url; }
+        try { target = new URL(assetUrl(url)); } catch (e) { return url; }
         if (target.protocol === "blob:") return url;
-        if (target.host === location.host) return url;
+        if (target.host === assetHost()) return url;
         target.protocol = wantWs ? toWsProtocol(serverReplacement.protocol) : toHttpProtocol(serverReplacement.protocol);
         target.host = serverReplacement.host;
         return target.toString();
@@ -129,7 +141,7 @@
       var streamingAssetFiles = [
         {
                 "url": "StreamingAssets/aa/AddressablesLink/link.xml",
-                "bytes": 28931,
+                "bytes": 28453,
                 "type": "application/xml"
         },
         {
@@ -248,7 +260,7 @@
 
       async function preloadStreamingAssets() {
         var regularFiles = streamingAssetFiles.map(async (file) => {
-          var url = new URL(file.url, location.href).href;
+          var url = assetUrl(file.url);
           var promise = downloadBlob(url, file.type);
           streamingAssetCache.set(url, promise);
           await promise;
@@ -262,7 +274,7 @@
       window.fetch = function(resource, options) {
         var requestUrl = typeof resource === "string" ? resource : resource instanceof URL ? resource.href : resource.url;
         var cleanUrl = requestUrl.split("?")[0].split("#")[0];
-        var cached = streamingAssetCache.get(new URL(cleanUrl, location.href).href);
+        var cached = streamingAssetCache.get(assetUrl(cleanUrl));
         if (cached) return cached.then(blobResponse);
         var fileName = cleanUrl.substring(cleanUrl.lastIndexOf("/") + 1);
         var splitBundle = splitBundles[fileName];
