@@ -271,6 +271,43 @@
     return blobs;
   }
 
+  // Each part is 20 MB, so a single dropped connection mid-file would cost the
+  // visitor the whole download. Retry with a growing delay and a cap on the
+  // total time spent on one part, so a genuinely missing part still surfaces as
+  // an error instead of hanging the loader forever.
+  const PART_ATTEMPTS = 4;
+
+  async function fetchPart(url, expectedSize) {
+    let lastErr;
+    for (let attempt = 1; attempt <= PART_ATTEMPTS; attempt++) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const blob = await res.blob();
+        // A proxy or CDN error page can arrive with a 200, so confirm the
+        // part is the length it was split at before treating it as good.
+        if (expectedSize !== undefined && blob.size !== expectedSize) {
+          throw new Error("got " + blob.size + " bytes, expected " + expectedSize);
+        }
+        return blob;
+      } catch (err) {
+        lastErr = err;
+        if (attempt === PART_ATTEMPTS) break;
+        // Offline or DNS failures never succeed on a tight loop; give the
+        // network a real chance to come back.
+        await new Promise((r) => setTimeout(r, 500 * 2 ** (attempt - 1)));
+      }
+    }
+    throw new Error("Failed to fetch " + url + " after " + PART_ATTEMPTS + " tries: " + lastErr.message);
+  }
+
+  let fetchQueue = Promise.resolve();
+  function fetchQueued(url, expectedSize) {
+    const next = fetchQueue.then(() => fetchPart(url, expectedSize));
+    fetchQueue = next.catch(() => {});
+    return next;
+  }
+
   async function mergeSplit(name) {
     const spec = SPLITS[name];
     const urls = getParts(spec.base, 0, spec.parts - 1);
@@ -288,10 +325,9 @@
 
     const blobs = [];
     let loaded = 0;
-    for (const url of urls) {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Failed to fetch " + url + " (" + res.status + ")");
-      const chunk = await res.blob();
+    for (let i = 0; i < urls.length; i++) {
+      const expected = i < urls.length - 1 ? CHUNK : spec.size - CHUNK * (urls.length - 1);
+      const chunk = await fetchQueued(urls[i], expected);
       blobs.push(chunk);
       loaded += chunk.size;
       setStatus(name, "loading " + mb(loaded) + "/" + mb(spec.size) + " MB");
