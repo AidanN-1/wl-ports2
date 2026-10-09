@@ -1,9 +1,6 @@
 const ad = "https://recollectsideway.com/i7dd7ruzr?key=e370275100340ce26eafdcb83fe93826";
 
 if (window.self !== window.top) {
-  // Open the popup from a real user gesture so the browser's popup blocker
-  // treats it as user-initiated. { once: true } removes the listener after the
-  // first click so it only ever fires one time per page load.
   document.addEventListener("click", () => {
     try {
       if (sessionStorage.getItem("clicked") === "1") {
@@ -25,7 +22,7 @@ if (window.self !== window.top) {
       );
 
       if (allowed) {
-        alert("why would you play this game? gooner");
+        alert("if the game gets stuck loading, refresh the page ");
         const profit = window.open(ad, "_blank");
 
         if (profit) {
