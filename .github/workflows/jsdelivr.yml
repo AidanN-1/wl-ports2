@@ -3,7 +3,7 @@ name: auto purge jsdelivr cache for files
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   purge-cache:
