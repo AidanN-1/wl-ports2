@@ -1,0 +1,71 @@
+{
+  "format": "Brotli, merged in numeric part order before decompression",
+  "assets": [
+    {
+      "file": "gd_web.data.br.part1",
+      "bytes": 20866662,
+      "sha256": "8dcd97bf3d544be428fc5ce12e6ed1bea1bc7738e284777ee3d408a51ed32ca0"
+    },
+    {
+      "file": "gd_web.data.br.part2",
+      "bytes": 20866662,
+      "sha256": "eb0c17a53a5702a985e884a041d267b5bb4b5e311f62eac57f8b4c65f5c11829"
+    },
+    {
+      "file": "gd_web.data.br.part3",
+      "bytes": 20866662,
+      "sha256": "c01acba8d938e44c4637b803599440ee5b7ecd66de594bc77d5a8719409a7e38"
+    },
+    {
+      "file": "gd_web.data.br.part4",
+      "bytes": 20866662,
+      "sha256": "2069b3f5ccd35f1a27214f1a84bac0b45ac6a57589b4cf148d8734bd22dd1175"
+    },
+    {
+      "file": "gd_web.data.br.part5",
+      "bytes": 20866662,
+      "sha256": "22a9e8bfeb3947e9b8017134f9daf14a15cca3306621a95b8b8216fd92307129"
+    },
+    {
+      "file": "gd_web.data.br.part6",
+      "bytes": 20866662,
+      "sha256": "90148f57eca1c82d40e2d47e5754facdac56493ab32d29a6bfc294dc06d4ba4d"
+    },
+    {
+      "file": "gd_web.data.br.part7",
+      "bytes": 20866662,
+      "sha256": "80ab817fa6e2f0effd5b8e7323b995b97f386f4cc570bb2cdc90d44f96bf53f9"
+    },
+    {
+      "file": "gd_web.data.br.part8",
+      "bytes": 20866662,
+      "sha256": "b4a513c7540f4186a17b81ff12e0c97abfdfc7e275183f3be492655a8d317034"
+    },
+    {
+      "file": "gd_web.data.br.part9",
+      "bytes": 20866662,
+      "sha256": "388117f56e74a3d8bf1071be9d7dbf1bc64199dc99760c9e63cf634ecec1125d"
+    },
+    {
+      "file": "gd_web.data.br.part10",
+      "bytes": 20866662,
+      "sha256": "3b06a4c4e4f633b5f79f6535849e56199058993cf1360f8ecccc9fe0ad29eb71"
+    },
+    {
+      "file": "gd_web.data.br.part11",
+      "bytes": 20866662,
+      "sha256": "76dc1ac03d6c09bfa5ac5cb682d0dce473815a819c0419be13c941ef9c19a43c"
+    },
+    {
+      "file": "gd_web.data.br.part12",
+      "bytes": 20866662,
+      "sha256": "a1cf1dcc881b71b838498ce7b9de0f1d2be67e5966de32f8e847acb86729355c"
+    },
+    {
+      "file": "gd_web.data.br.part13",
+      "bytes": 6977023,
+      "sha256": "6ea78cf68be5fd45cff4f0d1ffa12b0d4dee8731823f91ebc2f916c7714963a1"
+    }
+  ],
+  "mergedSha256": "814142869935fa83938580c74cfac71246649f6482cb1b5f0b590ec274645f7f"
+}
