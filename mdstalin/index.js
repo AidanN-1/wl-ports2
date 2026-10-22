@@ -253,6 +253,69 @@ const Preloader = /** @constructor */ function () { // eslint-disable-line no-un
  *
  * @typedef {Object} EngineConfig
  */
+/**
+ * Load a split wasm file from parts.
+ * @param {string} basePath - Base path (e.g., "index" for index.wasm)
+ * @param {Object} manifest - Manifest with size and parts array
+ * @returns {Promise<Response>} Response with the assembled wasm
+ */
+function loadSplitWasm(basePath, manifest) {
+	if (!Number.isSafeInteger(manifest.size) || manifest.size <= 0 ||
+		!Array.isArray(manifest.parts) || manifest.parts.length === 0) {
+		return Promise.reject(new Error('invalid wasm manifest'));
+	}
+
+	const wasm = new Uint8Array(manifest.size);
+	let offset = 0;
+
+	const loadPart = (part) => {
+		return fetch(part.file).then(function (response) {
+			if (!response.ok) {
+				return Promise.reject(new Error(`${part.file}: http ${response.status}`));
+			}
+			return response.arrayBuffer().then(function (buffer) {
+				const bytes = new Uint8Array(buffer);
+				if (!Number.isSafeInteger(part.size) || part.size <= 0 ||
+					part.size > 20000000 || offset + part.size > wasm.length) {
+					return Promise.reject(new Error('invalid wasm part'));
+				}
+				if (bytes.length !== part.size) {
+					return Promise.reject(new Error(`${part.file}: incomplete download`));
+				}
+				if (globalThis.crypto?.subtle) {
+					return crypto.subtle.digest('SHA-256', bytes).then(function (digest) {
+						const hash = Array.from(new Uint8Array(digest), byte =>
+							byte.toString(16).padStart(2, '0')).join('');
+						if (hash !== part.sha256) {
+							return Promise.reject(new Error(`${part.file}: checksum mismatch`));
+						}
+						wasm.set(bytes, offset);
+						offset += bytes.length;
+						return Promise.resolve();
+					});
+				} else {
+					wasm.set(bytes, offset);
+					offset += bytes.length;
+					return Promise.resolve();
+				}
+			});
+		});
+	};
+
+	return manifest.parts.reduce(function (promise, part) {
+		return promise.then(function () {
+			return loadPart(part);
+		});
+	}, Promise.resolve()).then(function () {
+		if (offset !== wasm.length) {
+			return Promise.reject(new Error('incomplete wasm manifest'));
+		}
+		return new Response(wasm.buffer, {
+			headers: { 'content-type': 'application/wasm' }
+		});
+	});
+}
+
 const EngineConfig = {}; // eslint-disable-line no-unused-vars
 
 /**
@@ -659,14 +722,19 @@ const Engine = (function () {
 	 *
 	 * @param {string} basePath Base path of the engine to load.
 	 * @param {number=} [size=0] The file size if known.
+	 * @param {Object=} [wasmManifest=null] Optional manifest for split wasm loading.
 	 * @returns {Promise} A Promise that resolves once the engine is loaded.
 	 *
 	 * @function Engine.load
 	 */
-	Engine.load = function (basePath, size) {
+	Engine.load = function (basePath, size, wasmManifest) {
 		if (loadPromise == null) {
 			loadPath = basePath;
-			loadPromise = preloader.loadPromise(`${loadPath}.wasm`, size, true);
+			if (wasmManifest) {
+				loadPromise = loadSplitWasm(basePath, wasmManifest);
+			} else {
+				loadPromise = preloader.loadPromise(`${loadPath}.wasm`, size, true);
+			}
 			requestAnimationFrame(preloader.animateProgress);
 		}
 		return loadPromise;

@@ -118,6 +118,11 @@ body {
 document.addEventListener('DOMContentLoaded', function() {
 	const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":84521428,"index.wasm":39513091},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 	const GODOT_THREADS_ENABLED = false;
+
+	// Load split wasm
+	const wasmManifest = {"size":39513091,"parts":[{"file":"index.wasm.part0","size":20971520,"sha256":"c275b33c7a910b2cc899bdb23daf5f6636f120850edc6edcbac341403df7eb5b"},{"file":"index.wasm.part1","size":18541571,"sha256":"18646fb4d2c6b6fd2d6e90173b1e2904b501d2f1d33cc94710fce6d3d1db9cc4"}]};
+	Engine.load("index", 39513091, wasmManifest);
+
 	const engine = new Engine(GODOT_CONFIG);
 function loadSplitPck(engine, manifest) {
     const preload = engine.preloadFile;
