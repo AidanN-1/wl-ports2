@@ -113,11 +113,12 @@ body {
 			<div id="status-notice"></div>
 		</div>
 
-		<script src="index.js"></script>
+		<script src="index.js" defer></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":84521428,"index.wasm":39513091},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
-const GODOT_THREADS_ENABLED = false;
-const engine = new Engine(GODOT_CONFIG);
+document.addEventListener('DOMContentLoaded', function() {
+	const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":84521428,"index.wasm":39513091},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+	const GODOT_THREADS_ENABLED = false;
+	const engine = new Engine(GODOT_CONFIG);
 function loadSplitPck(engine, manifest) {
     const preload = engine.preloadFile;
 
@@ -275,6 +276,7 @@ loadSplitPck(engine, {"size":84521428,"parts":[{"file":"index.pck.part-0000","si
 		}, displayFailureNotice);
 	}
 }());
+		});
 		</script>
 	</body>
 </html>
