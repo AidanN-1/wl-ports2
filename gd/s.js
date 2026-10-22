@@ -500,9 +500,13 @@ function startupError(err) {
 }
 
 async function startGame() {
-  const worker = new Worker(new URL("brotli-worker.js", document.baseURI), {
-    type: "module"
-  });
+  // Fetch worker from CDN with CORS, then create blob URL to satisfy same-origin policy for module workers
+  const workerUrl = new URL("brotli-worker.js", "https://cdn.jsdelivr.net/gh/ajtabjs/wl-ports2@main/gd/");
+  const workerResponse = await fetch(workerUrl, { credentials: "omit" });
+  if (!workerResponse.ok) throw new Error("Failed to fetch brotli-worker.js from CDN: " + workerResponse.status);
+  const workerBlob = await workerResponse.blob();
+  const workerObjectUrl = URL.createObjectURL(workerBlob);
+  const worker = new Worker(workerObjectUrl, { type: "module" });
   let nextId = 0;
   const pending = new Map();
   worker.onmessage = ({ data }) => {
@@ -516,6 +520,7 @@ async function startGame() {
     for (const job of pending.values()) job.reject(new Error(event.message));
     pending.clear();
     worker.terminate();
+    URL.revokeObjectURL(workerObjectUrl);
   };
   function decompressInWorker(buffer) {
     return new Promise((resolve, reject) => {
@@ -561,6 +566,7 @@ async function startGame() {
     loadBrotliFile("gd_web.js.br",   1,  false)
   ]);
   worker.terminate();
+  URL.revokeObjectURL(workerObjectUrl);
   Module.wasmBinary = wasmBuffer;
   Module.getPreloadedPackage = () => dataBuffer;
   const scriptEl = document.createElement("script");
